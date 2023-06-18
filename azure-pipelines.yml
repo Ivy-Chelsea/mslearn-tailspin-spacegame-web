@@ -7,16 +7,15 @@ trigger:
 - '*'
 
 pool:
-  name: 'Default' # Replace Default with the name of your agent pool if you used a different pool
+  name: 'Default' #replace if needed with name of your agent pool
 
-variables:
-  buildConfiguration: 'Release'
-
+#variables:
+#  buildConfiguration: 'Release'
 steps:
 - stask: UseDotNet@2
   displayName: 'Use .NET SDK 6.x'
   inputs:
-    packageType: sdk
+    #packageType: sdk
     version: '6.x'
 
 - task: Npm@1
@@ -45,4 +44,17 @@ steps:
   inputs:
     command: 'build'
     arguments: '--no-restore --configuration Release'
-    projects: '**/*.csproj' 
+    projects: '**/*.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish the project - Release'
+  inputs:
+    command: 'publish'
+    projects: '**/*.csproj'
+    publishWebProjects: false
+    arguments: '--no-build --configuration Release --output $(Build.ArtifactStagingDirectory)/Release'
+    zipAfterPublish: true
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
+  condition: succeeded()
